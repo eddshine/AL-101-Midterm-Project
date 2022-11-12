@@ -1,0 +1,147 @@
+                     #rowPosition = self.tableWidget.rowCount()
+                     #self.ui.tableWidget.insertRow(rowPosition)
+                    # #print(rowPosition)
+                     #self.ui.tableWidget.setItem(rowPosition , 0, QTableWidgetItem(sorted(list(self.finiteStates))[i]))
+                     #self.ui.tableWidget.setItem(rowPosition , 1, QTableWidgetItem(sorted(list(self.finiteInputs))[x]))
+                    #self.transitionFlow[list(self.finiteStates)[i]].append(list(self.finiteInputs)[x])
+
+
+
+
+
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import * 
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtGui import * 
+from PyQt5.QtCore import * 
+import sys, random
+from collections import defaultdict
+
+
+class Ui(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Ui, self).__init__() # Call the inherited classes __init__ method
+        ui_dir = "resources/ui/widget.ui"
+        self.ui = uic.loadUi(ui_dir, self) # Load the .ui file
+        self.setWindowIcon(QtGui.QIcon('resources/ico/market_icon.ico'))
+        self.show() # Show the GUI
+
+        self.finiteStates = []
+        self.finiteInputs = []
+        self.initialState = None
+        self.finalState = None
+        self.transitionFlow = defaultdict(list)
+        self.transitions = {}
+        self.languages = []
+
+        self.isFiniteStatesReady = False
+        self.isFiniteInputsReady = False
+
+
+        # Table widget
+        self.ui.tableWidget.setColumnCount(1)
+        self.ui.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Transitions"))
+        self.ui.tableWidget.horizontalHeader().setStretchLastSection(True);
+
+        # Button Clicks
+        self.ui.btn_submit.clicked.connect(self.submitAction)
+        self.ui.btn_clear.clicked.connect(self.clearAction)
+        self.ui.btn_add.clicked.connect(self.addToTable)
+
+        # Report Errors
+        self.ui.in_fset.textChanged.connect(self.fsets_errors)
+        self.ui.in_fset_Sym.textChanged.connect(self.fsets_alpha_errors)
+        self.ui.in_initial.textChanged.connect(self.initial_states_errors)
+        self.ui.in_finalSet.textChanged.connect(self.final_state_errors)
+
+
+    def submitAction(self):
+        if self.verifyInputs():
+            print("True")
+        
+    def fsets_errors(self):
+         if len(self.ui.in_fset.text().split(",")) > 1 and self.ui.in_fset.text().split(",")[len(self.ui.in_fset.text().split(","))-1] != "":
+            self.ui.warn1.setText("")
+            self.finiteStates = set([i for i in self.ui.in_fset.text().split(',')])
+            self.isFiniteStatesReady = True
+            self.ui.btn_states.clear()
+            self.ui.btn_transitions.clear()
+            self.addToComboBox()
+         else:
+            self.ui.btn_states.clear()
+            self.ui.btn_transitions.clear()
+            self.isFiniteStatesReady = False
+            self.ui.warn1.setText("Required 2 or more")
+    
+    def fsets_alpha_errors(self):
+         if len(self.ui.in_fset_Sym.text()) != 0 and self.ui.in_fset_Sym.text().split(",")[len(self.ui.in_fset_Sym.text().split(","))-1] != "":
+            self.ui.warn2.setText("")
+            self.finiteInputs = set([i for i in self.ui.in_fset_Sym.text().split(',')])
+            self.isFiniteInputsReady = True
+            self.ui.btn_states.clear()
+            self.ui.btn_transitions.clear()
+            self.addToComboBox()
+         else:
+            self.ui.btn_states.clear()
+            self.ui.btn_transitions.clear()
+            self.isFiniteInputsReady = False
+            self.ui.warn2.setText("Shouldn't be empty")
+
+    def initial_states_errors(self):
+         if len(self.ui.in_initial.text()) == 0:
+            self.initialState = None
+            self.ui.warn3.setText("Shouldn't be empty")
+         elif self.ui.in_initial.text() not in self.finiteStates:
+            self.initialState = None
+            self.ui.warn3.setText("Pick from Finite Set of States")
+         else:
+            self.ui.warn3.setText("")
+            self.initialState = self.ui.in_initial.text()
+
+    def final_state_errors(self):
+        if len(self.ui.in_finalSet.text()) == 0:
+            self.finalState = None
+            self.ui.warn4.setText("Shouldn't be empty")
+        elif self.ui.in_finalSet.text() not in self.finiteStates:
+            self.finalState = None
+            self.ui.warn4.setText("Pick from Finite Set of States")
+        else:
+            self.ui.warn4.setText("")
+            self.finalState = self.ui.in_finalSet.text()
+
+
+    def verifyInputs(self):
+        if len(self.finiteStates) <= 1 or len(self.finiteInputs) == 0 or self.initialState is None or  self.finalState is None:
+            return False
+        else:
+            return True
+
+
+    def clearAction(self):
+        self.finiteStates = []
+        self.finiteInputs = []
+        self.initialState = None
+        self.finalState = None
+        self.transitionFlow = {}
+        self.languages = []
+        [i.clear() for i in [self.ui.in_finalSet, self.ui.in_fset, self.ui.in_fset_Sym, self.ui.in_initial]]
+        [i.setText("") for i in [self.ui.warn1, self.ui.warn2, self.ui.warn3, self.ui.warn4]]
+
+    def addToComboBox(self):
+        if self.isFiniteStatesReady == True and self.isFiniteInputsReady == True:
+            for i in self.finiteStates:
+                for x in self.finiteInputs:
+                    self.ui.btn_states.addItem(f"{i} ➜ {x} ➜ Q?")
+                self.ui.btn_transitions.addItem(i)
+            
+
+
+    def addToTable(self):
+        if self.isFiniteStatesReady == True and self.isFiniteInputsReady == True:
+            print("w")
+
+        
+
+app = QtWidgets.QApplication(sys.argv)
+window = Ui()
+app.exec_()

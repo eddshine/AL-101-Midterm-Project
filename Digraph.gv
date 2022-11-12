@@ -1,0 +1,15 @@
+digraph {
+	ranksep=0.5 size="8, 8"
+	rankdir=LR
+	Initial [label="" fontsize=14.0 shape=point]
+	a [fontsize=14.0 shape=circle]
+	b [fontsize=14.0 shape=circle]
+	c [fontsize=14.0 shape=doublecircle]
+	Initial -> a [arrowsize=0.85]
+	c -> c [label=" a " arrowsize=0.85 fontsize=14.0]
+	c -> c [label=" b " arrowsize=0.85 fontsize=14.0]
+	a -> b [label=" a " arrowsize=0.85 fontsize=14.0]
+	a -> b [label=" b " arrowsize=0.85 fontsize=14.0]
+	b -> c [label=" a " arrowsize=0.85 fontsize=14.0]
+	b -> c [label=" b " arrowsize=0.85 fontsize=14.0]
+}
